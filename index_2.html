@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F6E56" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="صحة الكبد" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>صحة الكبد</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green: #1D9E75;
+      --green-dark: #0F6E56;
+      --green-light: #E1F5EE;
+      --amber: #EF9F27;
+      --amber-light: #FAEEDA;
+      --red: #E24B4A;
+      --red-light: #FCEBEB;
+      --bg: #F4F6F5;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6b7280;
+      --border: rgba(0,0,0,0.08);
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .header {
+      background: linear-gradient(160deg, #0F6E56 0%, #1D9E75 100%);
+      padding: calc(env(safe-area-inset-top) + 1rem) 1.2rem 1.4rem;
+      color: white;
+    }
+    .header-top { display: flex; justify-content: space-between; align-items: center; }
+    .header-top h1 { font-size: 20px; font-weight: 700; }
+    .header-top .date { font-size: 12px; opacity: 0.8; }
+    .score-ring { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; background: rgba(255,255,255,0.12); border-radius: var(--radius); padding: 0.9rem 1rem; }
+    .ring-wrap { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+    .ring-wrap svg { transform: rotate(-90deg); }
+    .ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .ring-label .num { font-size: 18px; font-weight: 700; color: white; }
+    .ring-label .den { font-size: 10px; color: rgba(255,255,255,0.7); }
+    .score-info h2 { font-size: 16px; font-weight: 700; }
+    .score-info p { font-size: 12px; opacity: 0.8; margin-top: 3px; }
+    .nav-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 1rem 1.2rem 0; scrollbar-width: none; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .tab { flex-shrink: 0; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; background: var(--card); color: var(--muted); font-family: 'Tajawal', sans-serif; transition: all 0.2s; }
+    .tab.active { background: var(--green-dark); color: white; }
+    .content { padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: 1rem; }
+    .section-title { font-size: 14px; font-weight: 700; color: var(--muted); margin-bottom: 8px; }
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .metric-card { background: var(--card); border-radius: var(--radius-sm); padding: 14px; border: 0.5px solid var(--border); }
+    .metric-card .label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .metric-card .value { font-size: 20px; font-weight: 700; }
+    .metric-card .unit { font-size: 11px; color: var(--muted); margin-right: 2px; }
+    .metric-card .bar { height: 5px; background: #eee; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+    .metric-card .fill { height: 100%; border-radius: 3px; }
+    .status-badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; margin-top: 4px; }
+    .badge-ok { background: var(--green-light); color: var(--green-dark); }
+    .badge-warn { background: var(--amber-light); color: #854F0B; }
+    .alerts-list { display: flex; flex-direction: column; gap: 8px; }
+    .alert-card { background: var(--card); border-radius: var(--radius-sm); padding: 14px; border: 0.5px solid var(--border); display: flex; gap: 12px; align-items: flex-start; }
+    .alert-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .alert-card h3 { font-size: 14px; font-weight: 700; }
+    .alert-card p { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.6; }
+    .foods-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .food-card { background: var(--card); border-radius: var(--radius-sm); padding: 14px; border: 0.5px solid var(--border); }
+    .food-card .f-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+    .food-item { font-size: 12px; color: var(--muted); padding: 4px 0; border-bottom: 0.5px solid var(--border); }
+    .food-item:last-child { border: none; }
+    .tracker-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .track-btn { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 8px; text-align: center; cursor: pointer; transition: transform 0.15s; }
+    .track-btn:active { transform: scale(0.95); }
+    .track-btn .icon { font-size: 24px; margin-bottom: 4px; }
+    .track-btn .val { font-size: 18px; font-weight: 700; color: var(--green-dark); }
+    .track-btn .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 0.5px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0 calc(env(safe-area-inset-bottom) + 6px); }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 16px; border-radius: var(--radius-sm); }
+    .nav-item .nav-icon { font-size: 20px; }
+    .nav-item .nav-label { font-size: 10px; color: var(--muted); }
+    .nav-item.active .nav-label { color: var(--green-dark); font-weight: 700; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .pwa-banner { background: var(--green-light); border-radius: var(--radius-sm); padding: 12px; border: 0.5px solid var(--green); display: flex; gap: 10px; align-items: center; }
+    .pwa-banner p { font-size: 12px; color: var(--green-dark); line-height: 1.5; }
+    .pwa-banner .icon { font-size: 22px; flex-shrink: 0; }
+    .content-pad { padding-bottom: 90px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>صحة الكبد 🫀</h1>
+    <span class="date" id="today-date"></span>
+  </div>
+  <div class="score-ring">
+    <div class="ring-wrap">
+      <svg width="64" height="64" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="6"/>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="white" stroke-width="6"
+          stroke-dasharray="163" stroke-dashoffset="44" stroke-linecap="round"/>
+      </svg>
+      <div class="ring-label">
+        <span class="num">74</span>
+        <span class="den">/100</span>
+      </div>
+    </div>
+    <div class="score-info">
+      <h2>حالة الكبد: جيدة</h2>
+      <p>استمر في العادات الصحية للوصول لـ 90+</p>
+    </div>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <button class="tab active" onclick="switchTab('home')">الرئيسية</button>
+  <button class="tab" onclick="switchTab('metrics')">المؤشرات</button>
+  <button class="tab" onclick="switchTab('food')">التغذية</button>
+  <button class="tab" onclick="switchTab('tracker')">المتابعة</button>
+</div>
+
+<div class="content content-pad">
+
+  <div id="tab-home" class="page active">
+    <div class="pwa-banner">
+      <span class="icon">📲</span>
+      <p>أضف التطبيق للشاشة الرئيسية: اضغط على زر المشاركة ← "إضافة للشاشة الرئيسية"</p>
+    </div>
+    <br>
+    <div class="section-title">تنبيهات اليوم</div>
+    <div class="alerts-list">
+      <div class="alert-card">
+        <div class="alert-dot" style="background:#1D9E75;"></div>
+        <div><h3>اشرب الماء بانتظام</h3><p>الترطيب يساعد الكبد على تصفية السموم بكفاءة أعلى</p></div>
+      </div>
+      <div class="alert-card">
+        <div class="alert-dot" style="background:#EF9F27;"></div>
+        <div><h3>تجنب الأطعمة المقلية</h3><p>الدهون المشبعة تزيد الضغط على خلايا الكبد</p></div>
+      </div>
+      <div class="alert-card">
+        <div class="alert-dot" style="background:#5DCAA5;"></div>
+        <div><h3>30 دقيقة مشي يومياً</h3><p>النشاط البدني يقلل الدهون الكبدية ويحسن الدورة الدموية</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-metrics" class="page">
+    <div class="section-title">المؤشرات الطبية</div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="label">إنزيم ALT</div>
+        <div><span class="value">32</span><span class="unit">وحدة/ل</span></div>
+        <div class="status-badge badge-ok">طبيعي</div>
+        <div class="bar"><div class="fill" style="width:40%;background:#1D9E75;"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="label">إنزيم AST</div>
+        <div><span class="value">28</span><span class="unit">وحدة/ل</span></div>
+        <div class="status-badge badge-ok">طبيعي</div>
+        <div class="bar"><div class="fill" style="width:35%;background:#1D9E75;"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="label">البيليروبين</div>
+        <div><span class="value">0.8</span><span class="unit">ملغ/دل</span></div>
+        <div class="status-badge badge-ok">طبيعي</div>
+        <div class="bar"><div class="fill" style="width:20%;background:#1D9E75;"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="label">الألبومين</div>
+        <div><span class="value">4.2</span><span class="unit">غ/دل</span></div>
+        <div class="status-badge badge-warn">مراقبة</div>
+        <div class="bar"><div class="fill" style="width:70%;background:#EF9F27;"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="label">GGT</div>
+        <div><span class="value">45</span><span class="unit">وحدة/ل</span></div>
+        <div class="status-badge badge-ok">طبيعي</div>
+        <div class="bar"><div class="fill" style="width:50%;background:#1D9E75;"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="label">البروتين الكلي</div>
+        <div><span class="value">7.1</span><span class="unit">غ/دل</span></div>
+        <div class="status-badge badge-ok">طبيعي</div>
+        <div class="bar"><div class="fill" style="width:65%;background:#1D9E75;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-food" class="page">
+    <div class="section-title">دليل التغذية</div>
+    <div class="foods-grid">
+      <div class="food-card">
+        <div class="f-title" style="color:#0F6E56;">✅ مفيد للكبد</div>
+        <div class="food-item">الثوم والبصل</div>
+        <div class="food-item">الخضروات الورقية</div>
+        <div class="food-item">الشاي الأخضر</div>
+        <div class="food-item">الأفوكادو</div>
+        <div class="food-item">الكركم</div>
+        <div class="food-item">التوت والعنب</div>
+      </div>
+      <div class="food-card">
+        <div class="f-title" style="color:#993C1D;">❌ يجب تجنبه</div>
+        <div class="food-item">الكحول</div>
+        <div class="food-item">السكريات المكررة</div>
+        <div class="food-item">الأطعمة المصنعة</div>
+        <div class="food-item">الملح الزائد</div>
+        <div class="food-item">الدهون المشبعة</div>
+        <div class="food-item">المشروبات الغازية</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-tracker" class="page">
+    <div class="section-title">متابعة اليوم</div>
+    <div class="tracker-row">
+      <div class="track-btn" onclick="inc('water')">
+        <div class="icon">💧</div>
+        <div class="val" id="water">0</div>
+        <div class="lbl">أكواب ماء</div>
+      </div>
+      <div class="track-btn" onclick="inc('walk')">
+        <div class="icon">🚶</div>
+        <div class="val" id="walk">0</div>
+        <div class="lbl">جلسات مشي</div>
+      </div>
+      <div class="track-btn" onclick="inc('meals')">
+        <div class="icon">🥗</div>
+        <div class="val" id="meals">0</div>
+        <div class="lbl">وجبات صحية</div>
+      </div>
+    </div>
+    <br>
+    <div class="section-title">الهدف اليومي</div>
+    <div class="alerts-list">
+      <div class="alert-card">
+        <div class="alert-dot" style="background:#1D9E75;"></div>
+        <div><h3>8 أكواب ماء</h3><p id="water-prog">تحقق: 0 / 8</p></div>
+      </div>
+      <div class="alert-card">
+        <div class="alert-dot" style="background:#EF9F27;"></div>
+        <div><h3>30 دقيقة نشاط</h3><p id="walk-prog">تحقق: 0 / 1 جلسة</p></div>
+      </div>
+      <div class="alert-card">
+        <div class="alert-dot" style="background:#5DCAA5;"></div>
+        <div><h3>3 وجبات صحية</h3><p id="meals-prog">تحقق: 0 / 3</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-home" onclick="switchNav('home')">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">الرئيسية</span>
+  </div>
+  <div class="nav-item" id="nav-metrics" onclick="switchNav('metrics')">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">المؤشرات</span>
+  </div>
+  <div class="nav-item" id="nav-food" onclick="switchNav('food')">
+    <span class="nav-icon">🥗</span>
+    <span class="nav-label">التغذية</span>
+  </div>
+  <div class="nav-item" id="nav-tracker" onclick="switchNav('tracker')">
+    <span class="nav-icon">✅</span>
+    <span class="nav-label">المتابعة</span>
+  </div>
+</div>
+
+<script>
+  const counts = { water: 0, walk: 0, meals: 0 };
+  const goals = { water: 8, walk: 1, meals: 3 };
+  const prog = { water: 'water-prog', walk: 'walk-prog', meals: 'meals-prog' };
+  const labels = { water: 'كوب', walk: 'جلسة', meals: 'وجبة' };
+
+  function inc(key) {
+    counts[key]++;
+    document.getElementById(key).textContent = counts[key];
+    document.getElementById(prog[key]).textContent =
+      `تحقق: ${counts[key]} / ${goals[key]} ${labels[key]}`;
+    localStorage.setItem(key, counts[key]);
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function switchNav(name) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('nav-' + name).classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    const tabs = document.querySelectorAll('.tab');
+    const map = ['home','metrics','food','tracker'];
+    tabs[map.indexOf(name)].classList.add('active');
+  }
+
+  const d = new Date();
+  document.getElementById('today-date').textContent =
+    d.toLocaleDateString('ar-SA', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  ['water','walk','meals'].forEach(k => {
+    const v = localStorage.getItem(k);
+    if (v) { counts[k] = parseInt(v); document.getElementById(k).textContent = counts[k]; }
+  });
+</script>
+</body>
+</html>
